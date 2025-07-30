@@ -19,18 +19,25 @@ TEST_FILE_PATH = "groq_generated_test.py"
 # === STEP 1: Generate a Selenium test case from description ===
 def generate_test_code(description, url):
     prompt = (
-        f"You are a Python Selenium expert.\n\n"
-        f"Write a complete Python Selenium test script for the following:\n\n"
-        f"Test Goal: {description}\n"
-        f"Target URL: {url}\n\n"
-        "Requirements:\n"
-        "- Use Chrome WebDriver\n"
-        "- Use the latest Selenium syntax (e.g. find_element with By)\n"
-        "- Include all necessary imports\n"
-        "- Use explicit waits (WebDriverWait) to find elements\n"
-        "- Do not include markdown, code fences, or explanations\n"
-        "- Do not use backticks (`). Use repr() or str() for debugging output\n"
-        "- The code must be complete and runnable as is\n"
+
+       "You are a Python Selenium expert.\n\n"
+    "Write a complete Page Object Model (POM)-based Selenium test in Python.\n\n"
+    f"Test Goal: {description}\n"
+    f"Target URL: {url}\n\n"
+    "Requirements:\n"
+    "- Follow Page Object Model (POM) design pattern\n"
+    "- Create at least two classes: one for the Page Object, and one for the Test Case\n"
+    "- Use Chrome WebDriver (assume chromedriver is already installed and added to system PATH)\n"
+    "- Do NOT use webdriver_manager or any external dependency managers\n"
+    "- Use 5 seconds wait time for page loads after login\n"
+    "- Use explicit waits (WebDriverWait) to find elements and verify successful login by waiting for the shopping cart container to be visible\n"
+    "- In addition to verifying login, extract and print all inventory item names along with their prices after successful login\n"
+    "- Do NOT run Chrome in headless mode; the browser should be visible when the test runs\n"
+    "- Use the latest Selenium syntax with 'By' and 'WebDriverWait'\n"
+    "- Include all necessary imports\n"
+    "- Use repr() or str() for debug output if needed (no backticks)\n"
+    "- Return only valid Python code, no markdown or explanations\n"
+
     )
 
     payload = {
@@ -89,7 +96,7 @@ def run_agentic_test(description, url, max_attempts=3):
         passed, error = run_test()
 
         if passed:
-            print("✅ Test passed successfully!")
+            print("✅ Test passed successfully!") 
             return
         else:
             print("❌ Test failed. Healing...")
@@ -101,7 +108,9 @@ def run_agentic_test(description, url, max_attempts=3):
 # === MAIN ENTRY POINT ===
 if __name__ == "__main__":
     # Customize this test goal and URL as needed
-    test_goal = "Verify that clicking the login button on https://www.amazon.co.uk/ navigates to the dashboard page"
-    test_url = "https://www.amazon.co.uk/"
+
+    test_goal = "Verify that entering a valid username and password on https://www.saucedemo.com/ and clicking the login button successfully navigates to the products page."
+    test_url = "https://www.saucedemo.com/"
+
 
     run_agentic_test(test_goal, test_url)

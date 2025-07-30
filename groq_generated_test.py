@@ -2,51 +2,61 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.chrome.options import Options
+import time
 
-# Set up Chrome WebDriver
-options = webdriver.ChromeOptions()
-options.add_argument("--start-maximized")
-driver = webdriver.Chrome(options=options)
+class LoginPage:
+    def __init__(self, driver):
+        self.driver = driver
+        self.username_input = (By.ID, "user-name")
+        self.password_input = (By.ID, "password")
+        self.login_button = (By.ID, "login-button")
 
-# Navigate to Amazon UK
-driver.get("https://www.amazon.co.uk/")
+    def enter_username(self, username):
+        self.driver.find_element(*self.username_input).send_keys(username)
 
-# Find and click the sign in button
-sign_in_button = WebDriverWait(driver, 10).until(
-    EC.element_to_be_clickable((By.ID, "nav-link-accountList"))
-)
-sign_in_button.click()
+    def enter_password(self, password):
+        self.driver.find_element(*self.password_input).send_keys(password)
 
-# Find and click the email signin button
-driver.get("https://www.amazon.co.uk/ap/signin?_encoding=UTF8&ignoreAuthState=1")
+    def click_login(self):
+        self.driver.find_element(*self.login_button).click()
 
-# Find and enter email
-email_input = WebDriverWait(driver, 10).until(
-    EC.visibility_of_element_located((By.ID, "ap_email"))
-)
-email_input.send_keys("your_email@example.com")
+class ProductsPage:
+    def __init__(self, driver):
+        self.driver = driver
+        self.shopping_cart_container = (By.CSS_SELECTOR, ".shopping_cart_container")
+        self.inventory_items = (By.CSS_SELECTOR, ".inventory_item")
 
-# Find and enter password
-password_input = WebDriverWait(driver, 10).until(
-    EC.visibility_of_element_located((By.ID, "ap_password"))
-)
-password_input.send_keys("your_password")
+    def wait_for_login(self):
+        WebDriverWait(self.driver, 5).until(EC.visibility_of_element_located(self.shopping_cart_container))
 
-# Find and click the login button
-login_button = WebDriverWait(driver, 10).until(
-    EC.element_to_be_clickable((By.ID, "signInSubmit"))
-)
-login_button.click()
+    def get_inventory_items(self):
+        items = self.driver.find_elements(*self.inventory_items)
+        item_names = [item.find_element(By.CSS_SELECTOR, ".inventory_item_name").text for item in items]
+        item_prices = [item.find_element(By.CSS_SELECTOR, ".inventory_item_price").text for item in items]
+        return list(zip(item_names, item_prices))
 
-# Verify we are on the dashboard page
-try:
-    WebDriverWait(driver, 10).until(
-        EC.title_contains("Amazon")
-    )
-    print("Login successful. We are on the dashboard page.")
-except TimeoutException:
-    print("Login failed. We are not on the dashboard page.")
+class TestSauceDemoLogin:
+    def test_login(self):
+        options = Options()
+        options.headless = False
+        driver = webdriver.Chrome(options=options)
+        driver.get("https://www.saucedemo.com/")
 
-# Close the browser
-driver.quit()
+        login_page = LoginPage(driver)
+        login_page.enter_username("standard_user")
+        login_page.enter_password("secret_sauce")
+        login_page.click_login()
+
+        products_page = ProductsPage(driver)
+        products_page.wait_for_login()
+
+        inventory_items = products_page.get_inventory_items()
+        for item in inventory_items:
+            print(f"Item: {item[0]}, Price: {item[1]}")
+
+        driver.quit()
+
+if __name__ == "__main__":
+    test = TestSauceDemoLogin()
+    test.test_login()
