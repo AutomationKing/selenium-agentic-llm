@@ -89,7 +89,7 @@ def run_agentic_test(description, url, max_attempts=3):
     test_code = generate_test_code(description, url)
 
     for attempt in range(max_attempts):
-        print(f"\n🔁 Attempt {attempt + 1} of {max_attempts}")
+        print(f"\n🔁 Attempt {attempt + 2} of {max_attempts}")
         with open(TEST_FILE_PATH, 'w') as f:
             f.write(test_code)
 

@@ -3,7 +3,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
-import time
 
 class LoginPage:
     def __init__(self, driver):
@@ -32,9 +31,14 @@ class ProductsPage:
 
     def get_inventory_items(self):
         items = self.driver.find_elements(*self.inventory_items)
-        item_names = [item.find_element(By.CSS_SELECTOR, ".inventory_item_name").text for item in items]
-        item_prices = [item.find_element(By.CSS_SELECTOR, ".inventory_item_price").text for item in items]
-        return list(zip(item_names, item_prices))
+        item_names = []
+        item_prices = []
+        for item in items:
+            name = item.find_element(By.CSS_SELECTOR, ".inventory_item_name").text
+            price = item.find_element(By.CSS_SELECTOR, ".pricebar").text
+            item_names.append(name)
+            item_prices.append(price)
+        return item_names, item_prices
 
 class TestSauceDemoLogin:
     def test_login(self):
@@ -51,9 +55,10 @@ class TestSauceDemoLogin:
         products_page = ProductsPage(driver)
         products_page.wait_for_login()
 
-        inventory_items = products_page.get_inventory_items()
-        for item in inventory_items:
-            print(f"Item: {item[0]}, Price: {item[1]}")
+        item_names, item_prices = products_page.get_inventory_items()
+        print("Inventory Items:")
+        for name, price in zip(item_names, item_prices):
+            print(f"Name: {name}, Price: {price}")
 
         driver.quit()
 
