@@ -1,4 +1,4 @@
-# Task: Open Chrome and go to https://www.asda.jobs/
+# Task: open browser and navigate to asda.com
 
 # Write a simple code using Selenium that:
 # - Opens Chrome
@@ -16,7 +16,7 @@ import time
 driver = webdriver.Chrome()
 
 # Navigate to the website
-driver.get("https://www.asda.jobs/")
+driver.get("https://www.asd.com")
 
 # Wait 5 seconds
 time.sleep(5)
