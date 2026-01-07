@@ -1,0 +1,52 @@
+image: mcr.microsoft.com/playwright:v1.41.0-jammy
+
+stages:
+  - test
+
+playwright_tests:
+  stage: test
+  when: manual
+
+  # ---- UI SELECTABLE ENV ----
+  variables:
+    ENV:
+      value: "dev"
+      options:
+        - test
+        - dev
+        - stage
+      description: "Select environment"
+
+  before_script:
+    - echo "Selected ENV: $ENV"
+
+    # ---- MAP ENV TO BASE URL ----
+    - |
+      if [ "$ENV" = "test" ]; then
+        export ENV_URL="https://test-child-maintenence.dwp.gov.uk"
+      elif [ "$ENV" = "stage" ]; then
+        export ENV_URL="https://stage-child-maintenence.dwp.gov.uk"
+      else
+        export ENV_URL="https://dev-child-maintenence.dwp.gov.uk"
+      fi
+
+    - echo "Using ENV_URL=$ENV_URL"
+
+    # ---- SETUP ----
+    - npm ci
+    - npx playwright install chromium
+
+  script:
+    - npx playwright test --workers=2
+    - npx allure generate allure-results --clean -o allure-report
+
+  artifacts:
+    when: always
+    expire_in: 7 days
+    paths:
+      - allure-report/
+      - playwright-report/
+      - test-results/
+
+  environment:
+    name: $ENV
