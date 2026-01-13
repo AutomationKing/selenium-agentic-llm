@@ -3,19 +3,23 @@ image: mcr.microsoft.com/playwright:v1.41.0-jammy
 stages:
   - test
 
+# ---- PIPELINE LEVEL VARIABLE (DROPDOWN) ----
+workflow:
+  rules:
+    - when: always
+
+variables:
+  ENV:
+    value: "dev"
+    description: "Select environment"
+    options:
+      - dev
+      - test
+      - stage
+
 playwright_tests:
   stage: test
   when: manual
-
-  # ---- UI SELECTABLE ENV ----
-  variables:
-    ENV:
-      value: "dev"
-      options:
-        - test
-        - dev
-        - stage
-      description: "Select environment"
 
   before_script:
     - echo "Selected ENV: $ENV"
