@@ -1,4 +1,4 @@
-# Use Playwright image for the job
+# Default image for jobs (can be overridden per job)
 image: mcr.microsoft.com/playwright:v1.41.0-jammy
 
 # Pipeline variables with dropdown
@@ -15,13 +15,20 @@ variables:
 stages:
   - test
 
-# Playwright test job
+# ----------------------
+# Playwright Test Job
+# ----------------------
 playwright_tests:
   stage: test
-  when: manual  # Manual trigger
+  when: manual
+  tags:
+    - docker-in-docker-privileged   # Ensures the same runner type as your first YAML
+  services:
+    - name: docker:20.10.6-dind     # Optional; required only if your tests need Docker
   before_script: |
-    echo "Selected ENV: $ENV"
+    echo "Selected Environment: $ENV"
 
+    # Map ENV to actual URLs
     if [ "$ENV" = "test" ]; then
       export ENV_URL="https://test-child-maintenence.dwp.gov.uk"
     elif [ "$ENV" = "stage" ]; then
