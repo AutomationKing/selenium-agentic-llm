@@ -1,10 +1,10 @@
-# Top-level default image (used if job does not override)
+# Use Playwright image for the job
 image: mcr.microsoft.com/playwright:v1.41.0-jammy
 
 # Pipeline variables with dropdown
 variables:
   ENV:
-    description: "Select environment for the tests"
+    description: "Select environment for Playwright tests"
     value: "dev"
     options:
       - "dev"
@@ -18,32 +18,23 @@ stages:
 # Playwright test job
 playwright_tests:
   stage: test
-  when: manual
-  # Optional: override top-level image (not needed here since it's same)
-  # image: mcr.microsoft.com/playwright:v1.41.0-jammy
+  when: manual  # Manual trigger
+  before_script: |
+    echo "Selected ENV: $ENV"
 
-  # Optional: add proxy if your network requires it
-  # before_script:
-  #   - export HTTP_PROXY="http://proxy.local.dwpcloud.uk:3128"
-  #   - export HTTPS_PROXY="http://proxy.local.dwpcloud.uk:3128"
-  #   - export http_proxy="http://proxy.local.dwpcloud.uk:3128"
-  #   - export https_proxy="http://proxy.local.dwpcloud.uk:3128"
+    if [ "$ENV" = "test" ]; then
+      export ENV_URL="https://test-child-maintenence.dwp.gov.uk"
+    elif [ "$ENV" = "stage" ]; then
+      export ENV_URL="https://stage-child-maintenence.dwp.gov.uk"
+    else
+      export ENV_URL="https://dev-child-maintenence.dwp.gov.uk"
+    fi
 
-  before_script:
-    - echo "Selected ENV: $ENV"
-    - |
-      if [ "$ENV" = "test" ]; then
-        export ENV_URL="https://test-child-maintenence.dwp.gov.uk"
-      elif [ "$ENV" = "stage" ]; then
-        export ENV_URL="https://stage-child-maintenence.dwp.gov.uk"
-      else
-        export ENV_URL="https://dev-child-maintenence.dwp.gov.uk"
-      fi
-    - echo "Using ENV_URL=$ENV_URL"
+    echo "Using ENV_URL=$ENV_URL"
 
-    # Install dependencies and browser
-    - npm ci
-    - npx playwright install chromium
+    # Install dependencies and Playwright browser
+    npm ci
+    npx playwright install chromium
 
   script:
     - npx playwright test --workers=2
