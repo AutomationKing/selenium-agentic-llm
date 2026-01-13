@@ -3,18 +3,9 @@ image: mcr.microsoft.com/playwright:v1.41.0-jammy
 stages:
   - test
 
-workflow:
-  rules:
-    - when: always
-
+# --- PIPELINE VARIABLE (manual override) ---
 variables:
-  ENV:
-    value: "dev"
-    description: "Select environment"
-    options:
-      - dev
-      - test
-      - stage
+  ENV: "dev"  # default value if user doesn't specify
 
 playwright_tests:
   stage: test
