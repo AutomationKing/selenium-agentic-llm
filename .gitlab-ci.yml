@@ -1,17 +1,23 @@
 # Default image for Playwright jobs
 image: mcr.microsoft.com/playwright:v1.41.0-jammy
 
-# Services & tags (optional, only if you need Docker)
-# Remove if using shared runners without Docker
-services:
-  - name: docker:20.10.6-dind
-tags:
-  - dwp-aws-x86-linux-1-dind  # Use a runner with this tag if required
+# Default settings for all jobs
+default:
+  before_script:
+    - echo "Setting up environment"
+    - npm ci
+    - npx playwright install chromium firefox webkit
+  artifacts:
+    when: always
+    expire_in: 3 months
+    paths:
+      - allure-report/
+      - playwright-report/
 
 # Pipeline variables with dropdowns
 variables:
   ENV:
-    description: "Select an environment URL"
+    description: "Select the environment URL"
     value: "https://dev-child-maintenance.dwp.gov.uk/calculate/"
     options:
       - "https://stage-child-maintenance.dwp.gov.uk/calculate/"
@@ -37,7 +43,7 @@ variables:
       - "WebKit"
 
   TAGS:
-    description: "Select specific tests to run (Playwright project tags)"
+    description: "Select specific tests to run (Playwright grep tags)"
     value: "@smoke"
     options:
       - "@smoke"
@@ -74,40 +80,22 @@ security-test-job:
           "-config",
           "api.disablekey=true"
         ]
-  before_script: |
-    echo "Running security tests on ENV=$ENV, OS=$OS, BROWSER=$BROWSER"
-    npm ci
-    npx playwright install
   script:
+    - echo "Running security tests on ENV=$ENV, OS=$OS, BROWSER=$BROWSER"
     - TARGET_ENV=$ENV npx playwright test --grep "$TAGS" --project="$BROWSER"
     - npx allure generate allure-results --clean -o allure-report
-  artifacts:
-    when: always
-    expire_in: 3 months
-    paths:
-      - allure-report/
-      - playwright-report/
   environment:
     name: $ENV
 
 # ----------------------
-# Functional / Unit Test Job
+# Playwright Functional / Unit Test Job
 # ----------------------
 playwright-tests-job:
   stage: test
   when: manual
-  before_script: |
-    echo "Running functional tests on ENV=$ENV, OS=$OS, BROWSER=$BROWSER"
-    npm ci
-    npx playwright install
   script:
-    - npx playwright test --grep "$TAGS" --project="$BROWSER"
+    - echo "Running functional tests on ENV=$ENV, OS=$OS, BROWSER=$BROWSER"
+    - TARGET_ENV=$ENV npx playwright test --grep "$TAGS" --project="$BROWSER"
     - npx allure generate allure-results --clean -o allure-report
-  artifacts:
-    when: always
-    expire_in: 3 months
-    paths:
-      - allure-report/
-      - playwright-report/
   environment:
     name: $ENV
