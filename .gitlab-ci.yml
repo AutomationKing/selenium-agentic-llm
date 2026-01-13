@@ -3,7 +3,6 @@ image: mcr.microsoft.com/playwright:v1.41.0-jammy
 stages:
   - test
 
-# ---- PIPELINE LEVEL VARIABLE (DROPDOWN) ----
 workflow:
   rules:
     - when: always
@@ -22,10 +21,9 @@ playwright_tests:
   when: manual
 
   before_script:
-    - echo "Selected ENV: $ENV"
-
-    # ---- MAP ENV TO BASE URL ----
     - |
+      echo "Selected ENV: $ENV"
+
       if [ "$ENV" = "test" ]; then
         export ENV_URL="https://test-child-maintenence.dwp.gov.uk"
       elif [ "$ENV" = "stage" ]; then
@@ -34,11 +32,10 @@ playwright_tests:
         export ENV_URL="https://dev-child-maintenence.dwp.gov.uk"
       fi
 
-    - echo "Using ENV_URL=$ENV_URL"
+      echo "Using ENV_URL=$ENV_URL"
 
-    # ---- SETUP ----
-    - npm ci
-    - npx playwright install chromium
+      npm ci
+      npx playwright install chromium
 
   script:
     - npx playwright test --workers=2
