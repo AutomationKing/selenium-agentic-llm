@@ -1,20 +1,37 @@
+# Top-level default image (used if job does not override)
 image: mcr.microsoft.com/playwright:v1.41.0-jammy
 
+# Pipeline variables with dropdown
+variables:
+  ENV:
+    description: "Select environment for the tests"
+    value: "dev"
+    options:
+      - "dev"
+      - "test"
+      - "stage"
+
+# Pipeline stages
 stages:
   - test
 
-# --- PIPELINE VARIABLE (manual override) ---
-variables:
-  ENV: "dev"  # default value if user doesn't specify
-
+# Playwright test job
 playwright_tests:
   stage: test
   when: manual
+  # Optional: override top-level image (not needed here since it's same)
+  # image: mcr.microsoft.com/playwright:v1.41.0-jammy
+
+  # Optional: add proxy if your network requires it
+  # before_script:
+  #   - export HTTP_PROXY="http://proxy.local.dwpcloud.uk:3128"
+  #   - export HTTPS_PROXY="http://proxy.local.dwpcloud.uk:3128"
+  #   - export http_proxy="http://proxy.local.dwpcloud.uk:3128"
+  #   - export https_proxy="http://proxy.local.dwpcloud.uk:3128"
 
   before_script:
+    - echo "Selected ENV: $ENV"
     - |
-      echo "Selected ENV: $ENV"
-
       if [ "$ENV" = "test" ]; then
         export ENV_URL="https://test-child-maintenence.dwp.gov.uk"
       elif [ "$ENV" = "stage" ]; then
@@ -22,11 +39,11 @@ playwright_tests:
       else
         export ENV_URL="https://dev-child-maintenence.dwp.gov.uk"
       fi
+    - echo "Using ENV_URL=$ENV_URL"
 
-      echo "Using ENV_URL=$ENV_URL"
-
-      npm ci
-      npx playwright install chromium
+    # Install dependencies and browser
+    - npm ci
+    - npx playwright install chromium
 
   script:
     - npx playwright test --workers=2
