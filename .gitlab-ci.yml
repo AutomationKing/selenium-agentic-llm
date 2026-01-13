@@ -1,7 +1,11 @@
-# Default image for Playwright jobs
+# =============================
+# GitLab CI/CD for Playwright
+# =============================
+
+# Default image for all jobs
 image: mcr.microsoft.com/playwright:v1.41.0-jammy
 
-# Default settings for all jobs
+# Default configuration for all jobs
 default:
   before_script:
     - echo "Setting up environment"
@@ -14,16 +18,26 @@ default:
       - allure-report/
       - playwright-report/
 
-# Pipeline variables with dropdowns
+# ----------------------------
+# Pipeline Variables (Dropdowns)
+# ----------------------------
 variables:
   ENV:
-    description: "Select the environment URL"
+    description: "Select the environment URL for tests"
     value: "https://dev-child-maintenance.dwp.gov.uk/calculate/"
     options:
       - "https://stage-child-maintenance.dwp.gov.uk/calculate/"
       - "https://dev-child-maintenance.dwp.gov.uk/calculate/"
       - "https://cms-apply-calculator-ui.cms.pdu-dev.hcs-eks.dwpcloud.uk/calculate/"
       - "https://cms-apply-calculator-ui.cms.pdu-test.hcs-eks.dwpcloud.uk/calculate/"
+
+  ENV_NAME:
+    description: "GitLab Environment Name (must be short and valid)"
+    value: "dev"
+    options:
+      - "dev"
+      - "stage"
+      - "test"
 
   OS:
     description: "Select an OS"
@@ -50,14 +64,16 @@ variables:
       - "@regression"
       - "@E2E"
 
-# Pipeline stages
+# ----------------------------
+# Pipeline Stages
+# ----------------------------
 stages:
   - security-dynamic-analysis
   - test
 
-# ----------------------
+# ----------------------------
 # Security Test Job (ZAP)
-# ----------------------
+# ----------------------------
 security-test-job:
   stage: security-dynamic-analysis
   when: manual
@@ -85,11 +101,12 @@ security-test-job:
     - TARGET_ENV=$ENV npx playwright test --grep "$TAGS" --project="$BROWSER"
     - npx allure generate allure-results --clean -o allure-report
   environment:
-    name: $ENV
+    name: $ENV_NAME   # ✅ short, valid GitLab environment name
+    url: $ENV         # ✅ actual URL
 
-# ----------------------
+# ----------------------------
 # Playwright Functional / Unit Test Job
-# ----------------------
+# ----------------------------
 playwright-tests-job:
   stage: test
   when: manual
@@ -98,4 +115,5 @@ playwright-tests-job:
     - TARGET_ENV=$ENV npx playwright test --grep "$TAGS" --project="$BROWSER"
     - npx allure generate allure-results --clean -o allure-report
   environment:
-    name: $ENV
+    name: $ENV_NAME   # ✅ short, valid GitLab environment name
+    url: $ENV         # ✅ actual URL
