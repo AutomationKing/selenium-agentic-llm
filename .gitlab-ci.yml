@@ -1,47 +1,25 @@
+image: mcr.microsoft.com/playwright:v1.39.0-jammy
+
+tags:
+  - dwp-aws-x86-linux-l
+
+variables:
+  TARGET_ENV:
+    value: "DEV"
+    options:
+      - DEV
+      - TEST
+
 stages:
   - test
 
-default:
-  image: registry.gitlab.com/dwp/engineering/platform/ci-docker-stable:latest
-  tags:
-    - dwp-aws-x86-linux-1
-  before_script:
-    - node --version
-    - npm --version
-    - npm ci
-    - npx playwright install --with-deps
-
-variables:
-  ENV:
-    value: "https://dev-child-maintenance.dwp.gov.uk/calculate/"
-    options:
-      - "https://dev-child-maintenance.dwp.gov.uk/calculate/"
-      - "https://stage-child-maintenance.dwp.gov.uk/calculate/"
-
-  ENV_NAME:
-    value: "dev"
-    options: [dev, stage]
-
-  BROWSER:
-    value: "chromium"
-    options: [chromium, firefox, webkit]
-
-  TAGS:
-    value: "@regression"
-    options: ["@smoke", "@regression", "@E2E"]
-
 playwright-tests:
   stage: test
-  when: manual
   script:
-    - echo "ENV=$ENV | BROWSER=$BROWSER | TAGS=$TAGS"
-    - TARGET_ENV=$ENV npx playwright test --grep "$TAGS" --project="$BROWSER"
-  environment:
-    name: $ENV_NAME
-    url: $ENV
+    - npm install
+    - echo "Running Playwright tests for $TARGET_ENV"
+    - TARGET_ENV=$TARGET_ENV npx playwright test
   artifacts:
     when: always
-    expire_in: 7 days
     paths:
-      - playwright-report/
       - test-results/
