@@ -1,1 +1,51 @@
 
+image: mcr.microsoft.com/playwright:v1.57.0-jammy
+
+stages:
+  - test
+
+variables:
+  BASE_URL:
+    value: "https://dev-child-maintenance.dwp.gov.uk/calculate/"
+    options:
+      - "https://dev-child-maintenance.dwp.gov.uk/calculate/"
+      - "https://stage-child-maintenance.dwp.gov.uk/calculate/"
+      - "https://cms-apply-calculator-ui.cms.pdu-dev.hcs-eks.dwpcloud.uk/calculate/"
+      - "https://cms-apply-calculator-ui.cms.pdu-test.hcs-eks.dwpcloud.uk/calculate/"
+
+  ENV_NAME:
+    value: "dev"
+    options: [dev, stage, test]
+
+  BROWSER:
+    value: "chromium"
+    options: [chromium, firefox, webkit]
+
+  TAGS:
+    value: "@regression"
+    options: ["@smoke", "@regression", "@E2E"]
+
+playwright-tests:
+  stage: test
+  when: manual
+  tags:
+    - dwp-aws-x86-linux-1-dind
+  before_script:
+    - npm config set registry https://registry.npmjs.org/
+    - npm cache clean --force
+    - npm ci
+    - npx playwright install --with-deps
+  script:
+    - BASE_URL=$BASE_URL npx playwright test --grep "$TAGS" --project="$BROWSER"
+    - npx allure generate allure-results --clean -o allure-report
+  environment:
+    name: $ENV_NAME
+    url: $BASE_URL
+  artifacts:
+    when: always
+    expire_in: 3 months
+    paths:
+      - allure-report/
+      - playwright-report/
+      - test-results/
+
