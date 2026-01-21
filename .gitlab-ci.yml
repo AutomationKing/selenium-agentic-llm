@@ -8,51 +8,24 @@ stages:
 
 variables:
   BASE_URL:
-    description: "Application URL"
     value: "https://dev-child-maintenance.dwp.gov.uk/calculate/"
-    options:
-      - "https://dev-child-maintenance.dwp.gov.uk/calculate/"
-      - "https://stage-child-maintenance.dwp.gov.uk/calculate/"
-      - "https://cms-apply-calculator-ui.cms.pdu-dev.hcs-eks.dwpcloud.uk/calculate/"
-      - "https://cms-apply-calculator-ui.cms.pdu-test.hcs-eks.dwpcloud.uk/calculate/"
-
   ENV_NAME:
-    description: "GitLab environment"
     value: "dev"
-    options:
-      - "dev"
-      - "stage"
-      - "test"
-
+    options: [dev, stage, test]
   BROWSER:
-    description: "Playwright browser"
     value: "chromium"
-    options:
-      - "chromium"
-      - "firefox"
-      - "webkit"
-
+    options: [chromium, firefox, webkit]
   TAGS:
-    description: "Test tags"
     value: "@regression"
-    options:
-      - "@smoke"
-      - "@regression"
-      - "@E2E"
+    options: ["@smoke", "@regression", "@E2E"]
 
 playwright-tests:
   stage: test
   when: manual
-  image: mcr.microsoft.com/playwright:v1.57.0-jammy
-  tags:
-    - dwp-aws-x86-linux-l
   script:
     - echo "Running Playwright tests"
-    - echo "ENV=$ENV_NAME"
-    - echo "URL=$BASE_URL"
-    - echo "BROWSER=$BROWSER"
-    - echo "TAGS=$TAGS"
     - npm install
+    - npx playwright install
     - BASE_URL=$BASE_URL npx playwright test --grep "$TAGS" --project="$BROWSER"
     - npx allure generate allure-results --clean -o allure-report
   environment:
@@ -65,5 +38,3 @@ playwright-tests:
       - allure-report/
       - playwright-report/
       - test-results/
-
-
