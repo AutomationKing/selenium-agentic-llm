@@ -1,20 +1,31 @@
-default:
-  image: $CI_REGISTRY/dwp/engineering/platform/ci-docker-stable
-  tags:
-    - dwp-aws-x86-linux-l
-
 stages:
   - test
 
+default:
+  image: registry.gitlab.com/dwp/engineering/platform/ci-docker-stable:latest
+  tags:
+    - dwp-aws-x86-linux-1
+  before_script:
+    - node --version
+    - npm --version
+    - npm ci
+    - npx playwright install --with-deps
+
 variables:
-  BASE_URL:
+  ENV:
     value: "https://dev-child-maintenance.dwp.gov.uk/calculate/"
+    options:
+      - "https://dev-child-maintenance.dwp.gov.uk/calculate/"
+      - "https://stage-child-maintenance.dwp.gov.uk/calculate/"
+
   ENV_NAME:
     value: "dev"
-    options: [dev, stage, test]
+    options: [dev, stage]
+
   BROWSER:
     value: "chromium"
     options: [chromium, firefox, webkit]
+
   TAGS:
     value: "@regression"
     options: ["@smoke", "@regression", "@E2E"]
@@ -23,18 +34,14 @@ playwright-tests:
   stage: test
   when: manual
   script:
-    - echo "Running Playwright tests"
-    - npm install
-    - npx playwright install
-    - BASE_URL=$BASE_URL npx playwright test --grep "$TAGS" --project="$BROWSER"
-    - npx allure generate allure-results --clean -o allure-report
+    - echo "ENV=$ENV | BROWSER=$BROWSER | TAGS=$TAGS"
+    - TARGET_ENV=$ENV npx playwright test --grep "$TAGS" --project="$BROWSER"
   environment:
     name: $ENV_NAME
-    url: $BASE_URL
+    url: $ENV
   artifacts:
     when: always
-    expire_in: 3 months
+    expire_in: 7 days
     paths:
-      - allure-report/
       - playwright-report/
       - test-results/
