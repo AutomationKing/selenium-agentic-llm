@@ -1,0 +1,22 @@
+Dear Team,
+
+I hope you are doing well.
+
+As part of my ongoing appraisal process with TCS , I would like to share a summary of the automation improvements and enhancements I have delivered since joining DWP on 1 October 2025. I truly value the collaboration we have had so far, and I would be grateful if you could share your feedback on the impact these changes have had on delivery, efficiency, and overall testing quality. Your perspectives will form an important part of my appraisal submission.
+
+Since joining the programme, my primary focus has been on improving execution speed, modernising the automation framework, and strengthening reporting and regression effectiveness across our four services — Calculator, Apply, GetHelp, and Respond. Key contributions and outcomes include:
+
+• Enhanced the existing automation framework by introducing parallel test execution and upgrading all libraries to the latest supported versions, improving scalability, stability, and overall performance.
+• Delivered significant reductions in regression execution timelines. For example, the Apply regression suite execution time has been reduced from approximately 1 hour to around 15 minutes, resulting in an average saving of approximately 45 minutes per execution across repositories.
+• Implemented dynamic reporting across all services, enabling faster analysis of test failures, identification of flaky tests, visibility into the last five execution trends, and tracking of the most recent successful test runs — improving overall transparency and decision-making.
+• Ensured regression suites were promptly updated whenever new pages or features were introduced, helping maintain strong regression coverage and supporting a proactive shift-left testing approach.
+• Successfully migrated the Calculator automation framework from Selenium to Playwright, reducing execution time for approximately 140 tests from around 30 minutes to about 4 minutes. Similar migration activities are currently underway for the remaining services to further enhance efficiency.
+
+It would be greatly appreciated if you could share your feedback on how these improvements have supported delivery timelines, collaboration, automation reliability, and overall programme efficiency. Even a brief summary of your observations would be extremely valuable.
+If possible, I would be grateful if you could also highlight any specific outcomes, measurable improvements, or positive collaboration experiences you have observed while working with me
+Thank you very much for your continued support and partnership — I genuinely appreciate your time and feedback.
+
+
+
+Kind regards,
+Ravi
